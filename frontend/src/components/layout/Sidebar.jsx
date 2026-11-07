@@ -47,23 +47,23 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-white border-r border-border flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-white border-r border-border flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
         <div>
           {/* Brand Header */}
-          <div className="h-16 flex items-center justify-between px-5 border-b border-border">
+          <div className="h-14 sm:h-16 flex items-center justify-between px-4 sm:px-5 border-b border-border">
             <Link
               to="/"
               onClick={onClose}
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-2.5 sm:gap-3 group"
             >
-              <div className="w-9 h-9 rounded-xl bg-burgundy flex items-center justify-center text-white font-bold text-lg shadow-sm group-hover:bg-burgundy-hover transition-colors">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-burgundy flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-sm group-hover:bg-burgundy-hover transition-colors">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <span className="font-bold text-base text-charcoal tracking-tight group-hover:text-burgundy transition-colors block">
+                <span className="font-bold text-sm sm:text-base text-charcoal tracking-tight group-hover:text-burgundy transition-colors block">
                   AdGen AI
                 </span>
                 <span className="text-[10px] font-semibold text-burgundy uppercase tracking-wider block">
@@ -75,7 +75,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
             {/* Mobile Close Button */}
             <button
               onClick={onClose}
-              className="lg:hidden p-1.5 text-charcoal-muted hover:text-charcoal rounded-lg hover:bg-ivory"
+              className="lg:hidden p-2 min-w-[40px] min-h-[40px] flex items-center justify-center text-charcoal-muted hover:text-charcoal rounded-xl hover:bg-ivory border border-border"
               aria-label="Đóng menu"
             >
               <X className="w-5 h-5" />
@@ -83,8 +83,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Navigation Menu */}
-          <nav className="p-3.5 space-y-1">
-            <div className="px-3 py-2 text-[11px] font-semibold text-charcoal-muted uppercase tracking-wider">
+          <nav className="p-3 space-y-1">
+            <div className="px-3 py-1.5 text-[10px] sm:text-[11px] font-semibold text-charcoal-muted uppercase tracking-wider">
               Menu chính
             </div>
             {NAV_ITEMS.map((item) => {
@@ -95,7 +95,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
                   to={item.path}
                   onClick={onClose}
                   className={({ isActive }) =>
-                    `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    `flex items-center justify-between px-3.5 py-3 sm:py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${
                       isActive
                         ? 'bg-burgundy text-white font-semibold shadow-xs'
                         : 'text-charcoal-muted hover:text-charcoal hover:bg-ivory'

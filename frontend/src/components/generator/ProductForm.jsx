@@ -101,7 +101,7 @@ export const ProductForm = ({ onSubmit, isLoading = false, initialValues = null 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-border p-4 sm:p-6 shadow-sm space-y-5">
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-border p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-xl bg-burgundy/10 text-burgundy flex items-center justify-center flex-shrink-0">
@@ -119,7 +119,7 @@ export const ProductForm = ({ onSubmit, isLoading = false, initialValues = null 
           type="button"
           onClick={handleFillSample}
           disabled={isLoading}
-          className="self-start sm:self-center flex-shrink-0 text-xs font-semibold text-burgundy bg-burgundy/5 hover:bg-burgundy/10 px-3 py-1.5 rounded-lg border border-burgundy/20 transition-colors"
+          className="self-start sm:self-center flex-shrink-0 text-xs font-semibold text-burgundy bg-burgundy/5 hover:bg-burgundy/10 px-3 py-1.5 min-h-[36px] rounded-lg border border-burgundy/20 transition-colors inline-flex items-center justify-center active:bg-burgundy/15"
         >
           Nạp dữ liệu mẫu
         </button>
@@ -136,7 +136,7 @@ export const ProductForm = ({ onSubmit, isLoading = false, initialValues = null 
           onChange={(e) => handleChange('product_name', e.target.value)}
           disabled={isLoading}
           placeholder="Ví dụ: Bình giữ nhiệt Inox cao cấp"
-          className={`w-full px-4 py-2.5 rounded-xl border text-sm text-charcoal placeholder:text-charcoal-muted/50 focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy transition-colors ${
+          className={`w-full px-3.5 sm:px-4 py-2.5 sm:py-2 rounded-xl border text-base sm:text-sm text-charcoal placeholder:text-charcoal-muted/50 focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy transition-colors ${
             errors.product_name ? 'border-rose-400 bg-rose-50/20' : 'border-border bg-white'
           }`}
         />
@@ -159,12 +159,12 @@ export const ProductForm = ({ onSubmit, isLoading = false, initialValues = null 
           </span>
         </div>
         <textarea
-          rows={4}
+          rows={3}
           value={formData.description}
           onChange={(e) => handleChange('description', e.target.value)}
           disabled={isLoading}
           placeholder="Mô tả đặc điểm và lợi ích nổi bật của sản phẩm..."
-          className={`w-full px-4 py-2.5 rounded-xl border text-sm text-charcoal placeholder:text-charcoal-muted/50 focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy transition-colors resize-none ${
+          className={`w-full px-3.5 sm:px-4 py-2.5 sm:py-2 rounded-xl border text-base sm:text-sm text-charcoal placeholder:text-charcoal-muted/50 focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy transition-colors resize-none sm:rows-4 ${
             errors.description ? 'border-rose-400 bg-rose-50/20' : 'border-border bg-white'
           }`}
         />
@@ -191,7 +191,7 @@ export const ProductForm = ({ onSubmit, isLoading = false, initialValues = null 
           onChange={(e) => handleChange('target_audience', e.target.value)}
           disabled={isLoading}
           placeholder="Ví dụ: Sinh viên, nhân viên văn phòng, người trẻ"
-          className={`w-full px-4 py-2.5 rounded-xl border text-sm text-charcoal placeholder:text-charcoal-muted/50 focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy transition-colors ${
+          className={`w-full px-3.5 sm:px-4 py-2.5 sm:py-2 rounded-xl border text-base sm:text-sm text-charcoal placeholder:text-charcoal-muted/50 focus:outline-none focus:ring-2 focus:ring-burgundy/20 focus:border-burgundy transition-colors ${
             errors.target_audience ? 'border-rose-400 bg-rose-50/20' : 'border-border bg-white'
           }`}
         />
@@ -224,7 +224,7 @@ export const ProductForm = ({ onSubmit, isLoading = false, initialValues = null 
           size="lg"
           isLoading={isLoading}
           icon={<Sparkles className="w-5 h-5 text-white" />}
-          className="w-full"
+          className="w-full min-h-[48px] py-3.5 sm:py-3 text-base sm:text-sm font-semibold shadow-md active:scale-[0.99] transition-transform"
         >
           Tạo nội dung bằng AI
         </Button>

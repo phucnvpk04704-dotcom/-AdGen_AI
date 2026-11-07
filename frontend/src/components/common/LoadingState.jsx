@@ -26,7 +26,7 @@ export const LoadingState = ({
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-border shadow-sm text-center">
+    <div className="flex flex-col items-center justify-center p-6 sm:p-12 bg-white rounded-xl sm:rounded-2xl border border-border shadow-sm text-center">
       <div className="relative mb-5">
         <div className="w-16 h-16 rounded-2xl bg-burgundy/10 flex items-center justify-center text-burgundy">
           <Sparkles className="w-8 h-8 animate-pulse text-burgundy" />

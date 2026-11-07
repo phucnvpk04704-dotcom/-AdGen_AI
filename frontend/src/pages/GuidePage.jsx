@@ -57,29 +57,29 @@ export const GuidePage = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-8">
       {/* Page Header */}
       <div className="pb-2 border-b border-border">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-burgundy/10 text-burgundy text-[11px] font-semibold mb-2">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-burgundy/10 text-burgundy text-[11px] font-semibold mb-1.5 sm:mb-2">
           <BookOpen className="w-3.5 h-3.5" />
           <span>Tài liệu hướng dẫn</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-charcoal tracking-tight">
+        <h1 className="text-xl sm:text-3xl font-bold text-charcoal tracking-tight">
           Hướng dẫn sử dụng AdGen AI
         </h1>
-        <p className="mt-1 text-sm text-charcoal-muted leading-relaxed">
+        <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-charcoal-muted leading-relaxed">
           Quy trình 5 bước tối ưu hóa nội dung quảng cáo với công nghệ AI thông minh.
         </p>
       </div>
 
       {/* Mandatory Caution Notice */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3.5">
-        <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-800">
-          <AlertTriangle className="w-5 h-5" />
+      <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 sm:gap-3.5">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-800 mt-0.5 sm:mt-0">
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div className="text-xs sm:text-sm leading-relaxed">
-          <h3 className="font-bold text-amber-950 mb-0.5">Lưu ý quan trọng về trách nhiệm nội dung</h3>
-          <p>
+          <h3 className="font-bold text-amber-950 mb-0.5 text-xs sm:text-sm">Lưu ý quan trọng về trách nhiệm nội dung</h3>
+          <p className="text-amber-900/90 text-xs sm:text-sm">
             AI có thể tạo nội dung chưa chính xác. Người dùng cần kiểm tra thông tin, giá, chương trình khuyến mãi và các tuyên bố trước khi đăng tải lên mạng xã hội.
           </p>
         </div>
@@ -87,27 +87,27 @@ export const GuidePage = () => {
 
       {/* 5 Steps Grid */}
       <div>
-        <h2 className="text-lg font-bold text-charcoal mb-4 flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-bold text-charcoal mb-3 sm:mb-4 flex items-center gap-2">
           <span>Quy trình làm việc 5 bước</span>
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
           {steps.map((item) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.step}
-                className="bg-white p-5 rounded-2xl border border-border shadow-xs hover:border-burgundy/30 transition-all flex flex-col justify-between"
+                className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-border shadow-xs hover:border-burgundy/30 transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2.5 sm:mb-3">
                     <span className="text-xs font-mono font-bold text-burgundy bg-burgundy/10 px-2.5 py-1 rounded-lg">
                       Bước {item.step}
                     </span>
-                    <div className="w-8 h-8 rounded-xl bg-ivory flex items-center justify-center text-charcoal-muted border border-border">
+                    <div className="w-8 h-8 rounded-lg sm:rounded-xl bg-ivory flex items-center justify-center text-charcoal-muted border border-border">
                       <Icon className="w-4 h-4" />
                     </div>
                   </div>
-                  <h3 className="font-bold text-charcoal text-base mb-1.5">
+                  <h3 className="font-bold text-charcoal text-sm sm:text-base mb-1">
                     {item.title}
                   </h3>
                   <p className="text-xs text-charcoal-muted leading-relaxed">
@@ -119,12 +119,12 @@ export const GuidePage = () => {
           })}
 
           {/* Quick CTA Box */}
-          <div className="bg-burgundy text-white p-6 rounded-2xl flex flex-col justify-between shadow-sm">
+          <div className="bg-burgundy text-white p-5 sm:p-6 rounded-xl sm:rounded-2xl flex flex-col justify-between shadow-sm">
             <div>
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white mb-3">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/10 flex items-center justify-center text-white mb-2.5 sm:mb-3">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <h3 className="font-bold text-lg text-white mb-1">
+              <h3 className="font-bold text-base sm:text-lg text-white mb-1">
                 Sẵn sàng trải nghiệm?
               </h3>
               <p className="text-xs text-white/80 leading-relaxed">
@@ -134,7 +134,7 @@ export const GuidePage = () => {
             <div className="pt-4">
               <Button
                 variant="outline"
-                className="bg-white text-burgundy hover:bg-ivory border-none w-full"
+                className="bg-white text-burgundy hover:bg-ivory border-none w-full min-h-[46px] font-semibold"
                 onClick={() => navigate('/generator')}
               >
                 Bắt đầu tạo nội dung
@@ -145,12 +145,12 @@ export const GuidePage = () => {
       </div>
 
       {/* Pro Tips Section */}
-      <div className="bg-white rounded-2xl border border-border p-6 shadow-xs">
-        <h3 className="font-bold text-base text-charcoal mb-3 flex items-center gap-2">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-border p-4 sm:p-6 shadow-xs">
+        <h3 className="font-bold text-sm sm:text-base text-charcoal mb-3 flex items-center gap-2">
           <HelpCircle className="w-4 h-4 text-burgundy" />
           <span>Bí quyết tạo nội dung bán hàng hiệu quả</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-charcoal-muted">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs text-charcoal-muted">
           {tips.map((tip, idx) => (
             <div key={idx} className="flex items-start gap-2.5 bg-ivory p-3.5 rounded-xl border border-border/60">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />

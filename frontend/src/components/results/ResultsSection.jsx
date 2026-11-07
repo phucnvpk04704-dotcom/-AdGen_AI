@@ -8,6 +8,7 @@ import {
   Heading,
   Hash,
   CheckCircle2,
+  Zap,
 } from 'lucide-react';
 import { CaptionCard } from './CaptionCard';
 import { HeadlineCard } from './HeadlineCard';
@@ -26,6 +27,7 @@ export const ResultsSection = ({
   isRegeneratingAll = false,
   regeneratingItem = null, // { type: 'caption'|'headline', index: number }
   isLiveAI = true,
+  performanceMetrics = null,
 }) => {
   const [copiedFull, setCopiedFull] = useState(false);
 
@@ -84,26 +86,44 @@ export const ResultsSection = ({
           </div>
         </div>
 
-        <Badge variant="success" size="sm" className="self-start sm:self-center flex-shrink-0" icon={<CheckCircle2 className="w-3 h-3 text-emerald-600" />}>
-          Chuẩn 3-3-5
-        </Badge>
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-center flex-shrink-0">
+          {performanceMetrics && (
+            <span
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-semibold font-mono shadow-2xs"
+              title={`Tổng thời gian: ${(performanceMetrics.frontend_waiting_ms / 1000).toFixed(1)}s (Backend: ${(performanceMetrics.backend_ms / 1000).toFixed(1)}s, AI: ${(performanceMetrics.gemini_ms / 1000).toFixed(1)}s) | Model: ${performanceMetrics.model || 'Gemini Flash'}`}
+            >
+              <Zap className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+              <span>{(performanceMetrics.frontend_waiting_ms / 1000).toFixed(1)}s</span>
+              {performanceMetrics.gemini_ms && (
+                <span className="text-emerald-600/80 font-normal hidden sm:inline">
+                  (AI: {(performanceMetrics.gemini_ms / 1000).toFixed(1)}s)
+                </span>
+              )}
+            </span>
+          )}
+
+          <Badge variant="success" size="sm" icon={<CheckCircle2 className="w-3 h-3 text-emerald-600" />}>
+            Chuẩn 3-3-5
+          </Badge>
+        </div>
       </div>
 
       {/* Main Results Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-border shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-white rounded-2xl border border-border shadow-xs">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-charcoal text-base">Bộ nội dung quảng cáo</span>
+          <span className="font-bold text-charcoal text-sm sm:text-base">Bộ nội dung quảng cáo</span>
           <Badge variant="burgundy" size="sm">
             Ready to Publish
           </Badge>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             size="sm"
             variant="outline"
             onClick={onRegenerateAll}
             isLoading={isRegeneratingAll}
+            className="flex-1 sm:flex-none min-h-[40px] justify-center"
             icon={<RefreshCw className="w-3.5 h-3.5" />}
           >
             Tạo lại tất cả
@@ -113,6 +133,7 @@ export const ResultsSection = ({
             size="sm"
             variant="primary"
             onClick={handleCopyFullBundle}
+            className="flex-1 sm:flex-none min-h-[40px] justify-center"
             icon={
               copiedFull ? (
                 <Check className="w-3.5 h-3.5 text-white" />
@@ -121,7 +142,7 @@ export const ResultsSection = ({
               )
             }
           >
-            {copiedFull ? 'Đã sao chép toàn bộ' : 'Sao chép toàn bộ'}
+            {copiedFull ? 'Đã sao chép' : 'Sao chép toàn bộ'}
           </Button>
         </div>
       </div>

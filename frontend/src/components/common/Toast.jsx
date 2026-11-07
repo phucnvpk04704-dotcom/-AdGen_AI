@@ -28,20 +28,22 @@ export const Toast = ({ message, type = 'success', onClose, duration = 3000 }) =
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 transition-all duration-300 ease-out">
+    <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 left-4 sm:left-auto max-w-sm sm:max-w-md mx-auto sm:mx-0 z-50 transition-all duration-300 ease-out animate-slide-up sm:animate-fade-in pointer-events-none">
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-sm font-medium border border-white/10 ${
+        className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-medium border border-white/10 ${
           bgStyles[type] || bgStyles.success
         }`}
       >
-        <span className="flex-shrink-0">{icons[type]}</span>
-        <span className="leading-snug">{message}</span>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="flex-shrink-0">{icons[type]}</span>
+          <span className="leading-snug break-words">{message}</span>
+        </div>
         <button
           onClick={onClose}
-          className="ml-2 text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+          className="ml-2 text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
           aria-label="Đóng"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-4 h-4" />
         </button>
       </div>
     </div>

@@ -147,3 +147,7 @@ class GenerationResponse(BaseModel):
     message: str = "Tạo nội dung thành công"
     data: GenerationData
     usage: Optional[dict] = Field(default=None, description="Thông tin token usage nếu có")
+    metrics: Optional[dict] = Field(
+        default=None,
+        description="Thông tin đo lường hiệu năng chi tiết (ms và token)",
+    )

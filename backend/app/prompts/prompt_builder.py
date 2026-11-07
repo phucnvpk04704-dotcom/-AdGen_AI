@@ -1,49 +1,45 @@
 """Prompt Builder module for constructing prompts for Gemini AI."""
 
-from typing import Optional
 from app.schemas.generator import GenerationRequest
 from app.schemas.regenerate import RegenerateRequest
 from app.prompts.tone_prompts import TONE_INSTRUCTIONS
 
 
 def build_generation_prompt(request: GenerationRequest) -> str:
-    """Build user prompt for full 3-3-5 advertising content generation."""
+    """Build optimized user prompt for full 3-3-5 advertising content generation."""
     tone_instruction = TONE_INSTRUCTIONS.get(request.tone, TONE_INSTRUCTIONS["youthful"])
 
-    prompt = f"""Hãy sáng tạo một bộ nội dung quảng cáo hoàn chỉnh cho sản phẩm sau:
+    prompt = f"""Tạo bộ nội dung quảng cáo hoàn chỉnh cho sản phẩm sau:
 
 [THÔNG TIN SẢN PHẨM]
 - Tên sản phẩm: {request.product_name}
 - Mô tả & Lợi ích: {request.description}
 - Khách hàng mục tiêu: {request.target_audience}
-- Tông giọng yêu cầu: {request.tone}
+- Tông giọng: {request.tone}
 
 [ĐỊNH HƯỚNG TÔNG GIỌNG]
 {tone_instruction}
 
 [YÊU CẦU ĐẦU RA BẮT BUỘC (CẤU TRÚC 3-3-5)]
 1. 03 BÀI VIẾT QUẢNG CÁO (CAPTIONS):
-   - caption_1 (approach: "benefit"): Tập trung làm nổi bật lợi ích thực tế và giá trị cụ thể của sản phẩm mang lại cho khách hàng.
-   - caption_2 (approach: "emotional"): Tập trung gắn liền sản phẩm với cảm xúc, câu chuyện đời sống hoặc phong cách cá nhân của người dùng.
-   - caption_3 (approach: "call_to_action"): Kêu gọi hành động tự nhiên, tạo sự hào hứng và thúc đẩy tương tác/mua sắm mà không hứa hẹn sai sự thật.
-   * Lưu ý: Cả 3 caption phải có nội dung hoàn chỉnh (từ mở đầu thu hút, thân bài đến kết bài), có độ dài vừa vặn (khoảng 150 - 450 từ mỗi bài), không lặp từ và đúng tông giọng đã chọn.
+   - caption_1 (approach: "benefit"): Nhấn mạnh lợi ích thực tế và giá trị sử dụng.
+   - caption_2 (approach: "emotional"): Kết nối cảm xúc, phong cách sống và sự đồng cảm.
+   - caption_3 (approach: "call_to_action"): Kêu gọi hành động tự nhiên, thúc đẩy tương tác.
+   * Yêu cầu: Độ dài 80 - 180 từ/bài, mở đầu ấn tượng, nội dung súc tích, lời kết, đúng tông giọng.
 
 2. 03 TIÊU ĐỀ (HEADLINES):
-   - headline_1: Tiêu đề nhấn mạnh lợi ích cốt lõi.
-   - headline_2: Tiêu đề gắn với nhu cầu hoặc tình huống sử dụng thực tế.
-   - headline_3: Tiêu đề gợi mở sự tò mò và thôi thúc hành động.
-   * Lưu ý: Ngắn gọn, súc tích, ấn tượng, không giật tít câu view sai sự thật.
+   - headline_1: Tiêu đề lợi ích cốt lõi.
+   - headline_2: Tiêu đề tình huống thực tế.
+   - headline_3: Tiêu đề gợi mở, thôi thúc.
+   * Yêu cầu: Ngắn gọn, thu hút, trung thực.
 
 3. 05 HASHTAGS:
-   - Đúng 05 hashtag liên quan trực tiếp đến tên sản phẩm, ngành hàng, tệp khách hàng và lối sống.
-   - Bắt buộc bắt đầu bằng dấu #, viết liền không dấu hoặc có dấu liền nhau, không chứa khoảng trắng và không được trùng nhau.
-
-Hãy trả về dữ liệu đúng theo JSON Schema được chỉ định."""
+   - 05 hashtag độc nhất, liên quan trực tiếp, bắt đầu bằng '#', viết liền không khoảng trắng, ngắn gọn dưới 30 ký tự, không lặp lại từ."""
     return prompt
 
 
 def build_single_regeneration_prompt(request: RegenerateRequest) -> str:
-    """Build prompt for regenerating a single caption or headline."""
+    """Build optimized prompt for regenerating a single caption or headline."""
     tone_instruction = TONE_INSTRUCTIONS.get(request.tone, TONE_INSTRUCTIONS["youthful"])
 
     target_type = request.target_type
@@ -60,30 +56,7 @@ def build_single_regeneration_prompt(request: RegenerateRequest) -> str:
             target_id, ("benefit", "lợi ích thực tế")
         )
 
-        prompt = f"""Hãy sáng tạo MỘT bài viết quảng cáo mới (Caption) thay thế cho nội dung cũ:
-
-[THÔNG TIN SẢN PHẨM]
-- Tên sản phẩm: {request.product_name}
-- Mô tả & Lợi ích: {request.description}
-- Khách hàng mục tiêu: {request.target_audience}
-- Tông giọng yêu cầu: {request.tone}
-
-[ĐỊNH HƯỚNG TÔNG GIỌNG]
-{tone_instruction}
-
-[YÊU CẦU LÀM MỚI RIÊNG LẺ]
-- Phần tử cần làm mới: {target_id}
-- Góc tiếp cận bắt buộc: {approach_code} ({approach_desc})
-- Nội dung cũ cần thay thế: "{existing_content}"
-
-YÊU CẦU QUAN TRỌNG:
-- Tạo một phương án caption HOÀN TOÀN MỚI, không lặp lại ý tưởng và câu chữ của nội dung cũ.
-- Viết bằng tiếng Việt tự nhiên, chuẩn xác, hấp dẫn theo đúng tông giọng và góc tiếp cận.
-- Trả về đối tượng CaptionItem gồm id="{target_id}", approach="{approach_code}", content="Nội dung mới..."."""
-        return prompt
-
-    else:  # headline
-        prompt = f"""Hãy sáng tạo MỘT tiêu đề quảng cáo mới (Headline) thay thế cho tiêu đề cũ:
+        prompt = f"""Tạo một Caption quảng cáo mới thay thế nội dung cũ:
 
 [THÔNG TIN SẢN PHẨM]
 - Tên sản phẩm: {request.product_name}
@@ -91,12 +64,26 @@ YÊU CẦU QUAN TRỌNG:
 - Khách hàng mục tiêu: {request.target_audience}
 - Tông giọng: {request.tone}
 
-[YÊU CẦU LÀM MỚI TIÊU ĐỀ]
-- Phần tử cần làm mới: {target_id}
-- Tiêu đề cũ cần thay thế: "{existing_content}"
+[ĐỊNH HƯỚNG TÔNG GIỌNG]
+{tone_instruction}
 
-YÊU CẦU:
-- Tiêu đề mới phải ấn tượng, ngắn gọn, phù hợp với sản phẩm và không lặp lại tiêu đề cũ.
-- Trả về đối tượng HeadlineItem gồm id="{target_id}", content="Tiêu đề mới..."."""
+[YÊU CẦU LÀM MỚI]
+- Mục tiêu: {target_id} (approach: "{approach_code}" - {approach_desc})
+- Nội dung cũ cần thay thế: "{existing_content}"
+- Viết một phương án HOÀN TOÀN MỚI, sáng tạo, không trùng lặp ý tưởng và câu chữ cũ, độ dài 80 - 180 từ."""
         return prompt
 
+    else:  # headline
+        prompt = f"""Tạo một Headline (tiêu đề) quảng cáo mới thay thế tiêu đề cũ:
+
+[THÔNG TIN SẢN PHẨM]
+- Tên sản phẩm: {request.product_name}
+- Mô tả & Lợi ích: {request.description}
+- Khách hàng mục tiêu: {request.target_audience}
+- Tông giọng: {request.tone}
+
+[YÊU CẦU LÀM MỚI]
+- Mục tiêu: {target_id}
+- Tiêu đề cũ cần thay thế: "{existing_content}"
+- Viết mới đối tượng HeadlineItem ngắn gọn, ấn tượng, phù hợp sản phẩm, không trùng lặp tiêu đề cũ."""
+        return prompt

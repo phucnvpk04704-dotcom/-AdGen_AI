@@ -64,4 +64,9 @@ class RegenerateResponse(BaseModel):
     data: Optional[GenerationData] = None
     item: Optional[Union[CaptionItem, HeadlineItem]] = None
     target_id: Optional[str] = None
+    usage: Optional[dict] = Field(default=None, description="Thông tin token usage nếu có")
+    metrics: Optional[dict] = Field(
+        default=None,
+        description="Thông tin đo lường hiệu năng chi tiết (ms và token)",
+    )
 

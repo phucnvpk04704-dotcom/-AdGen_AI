@@ -45,7 +45,7 @@ export const CaptionCard = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 shadow-xs hover:border-burgundy/30 transition-all flex flex-col justify-between group">
+    <div className="bg-white rounded-2xl border border-border p-4 sm:p-5 shadow-xs hover:border-burgundy/30 transition-all flex flex-col justify-between group">
       <div>
         {/* Card Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-border/80">
@@ -63,7 +63,7 @@ export const CaptionCard = ({
               onClick={() => onRegenerate(index, captionId, captionText)}
               disabled={isRegenerating}
               title="Tạo lại riêng caption này"
-              className="p-1.5 rounded-lg text-charcoal-muted hover:text-burgundy hover:bg-ivory border border-border transition-colors disabled:opacity-50"
+              className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg text-charcoal-muted hover:text-burgundy hover:bg-ivory border border-border transition-colors disabled:opacity-50 flex items-center justify-center active:bg-ivory-dark"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${isRegenerating ? 'animate-spin text-burgundy' : ''}`}
@@ -73,7 +73,7 @@ export const CaptionCard = ({
             <button
               onClick={handleCopy}
               title="Sao chép nội dung"
-              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+              className={`inline-flex items-center gap-1 px-3 py-1.5 min-h-[36px] sm:min-h-[32px] rounded-lg text-xs font-semibold border transition-all active:scale-95 ${
                 copied
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                   : 'bg-ivory text-charcoal-muted hover:text-charcoal hover:bg-ivory-dark border-border'
@@ -95,7 +95,7 @@ export const CaptionCard = ({
         </div>
 
         {/* Caption Content */}
-        <p className="text-sm text-charcoal leading-relaxed whitespace-pre-line font-normal">
+        <p className="text-sm text-charcoal leading-relaxed whitespace-pre-line font-normal break-words">
           {captionText}
         </p>
       </div>

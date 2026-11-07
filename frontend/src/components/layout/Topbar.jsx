@@ -18,32 +18,38 @@ export const Topbar = ({ onOpenSidebar }) => {
   };
 
   return (
-    <header className="h-16 bg-white border-b border-border sticky top-0 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-      <div className="flex items-center gap-3">
+    <header className="h-14 sm:h-16 bg-white/95 backdrop-blur-md border-b border-border sticky top-0 z-30 px-3.5 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         {/* Mobile Hamburger Menu Button */}
         <button
           type="button"
           onClick={onOpenSidebar}
-          className="lg:hidden p-2 rounded-xl text-charcoal hover:bg-ivory border border-border"
+          className="lg:hidden p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-charcoal hover:bg-ivory border border-border transition-colors active:scale-95"
           aria-label="Mở menu điều hướng"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        {/* Breadcrumb & Title */}
-        <div className="flex items-center gap-2 text-xs text-charcoal-muted">
-          <Link to="/" className="hover:text-charcoal transition-colors font-medium">
-            AdGen AI
+        {/* Brand & Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs text-charcoal-muted truncate">
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 hover:text-charcoal transition-colors font-medium flex-shrink-0"
+          >
+            <div className="w-6 h-6 rounded-lg bg-burgundy flex items-center justify-center text-white lg:hidden">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-bold text-charcoal text-sm sm:text-xs">AdGen AI</span>
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-border" />
-          <span className="text-charcoal font-semibold">
+          <ChevronRight className="w-3.5 h-3.5 text-border flex-shrink-0" />
+          <span className="text-charcoal font-semibold truncate text-xs sm:text-xs">
             {currentRoute.breadcrumb}
           </span>
         </div>
       </div>
 
-      {/* Right side: Quick Action */}
-      <div className="flex items-center gap-3">
+      {/* Right side: Quick Action (Desktop only to prevent mobile clutter) */}
+      <div className="hidden sm:flex items-center gap-3">
         {location.pathname !== '/generator' && (
           <Link
             to="/generator"

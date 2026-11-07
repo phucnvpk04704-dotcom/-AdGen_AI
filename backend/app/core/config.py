@@ -32,7 +32,7 @@ class Settings(BaseSettings):
         description="Google Gemini API Key (Secret: never expose to frontend)",
     )
     GEMINI_MODEL: str = Field(
-        default="gemini-3.8-flash",
+        default="gemini-3.5-flash-lite",
         description="Primary Gemini model identifier",
     )
     GEMINI_FALLBACK_MODEL: Optional[str] = Field(
@@ -40,12 +40,20 @@ class Settings(BaseSettings):
         description="Fallback Gemini model identifier if primary is unavailable",
     )
     GEMINI_TIMEOUT: int = Field(
-        default=25,
+        default=15,
         description="Timeout for each Gemini API request attempt in seconds",
     )
     GEMINI_MAX_RETRIES: int = Field(
         default=2,
         description="Maximum retry attempts for transient Gemini errors (default 2)",
+    )
+    GEMINI_MAX_OUTPUT_TOKENS: int = Field(
+        default=1800,
+        description="Maximum candidate output tokens for full 3-3-5 generation",
+    )
+    GEMINI_SINGLE_MAX_OUTPUT_TOKENS: int = Field(
+        default=600,
+        description="Maximum candidate output tokens for single item regeneration",
     )
 
     @property
@@ -55,8 +63,13 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> List[str]:
-        """Return list of allowed CORS origins."""
-        origins = {self.FRONTEND_ORIGIN.strip()}
+        """Return list of allowed CORS origins, supporting comma-separated lists and stripping trailing slashes."""
+        origins = set()
+        if self.FRONTEND_ORIGIN:
+            for origin in self.FRONTEND_ORIGIN.split(","):
+                clean = origin.strip().rstrip("/")
+                if clean:
+                    origins.add(clean)
         origins.add("http://localhost:5173")
         origins.add("http://127.0.0.1:5173")
         origins.add("http://localhost:3000")

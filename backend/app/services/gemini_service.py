@@ -1,4 +1,4 @@
-"""Gemini AI Client Service using official google-genai SDK with jittered retry and fallback model."""
+"""Gemini AI Client Service using official google-genai SDK with performance tracking, jittered retry and fallback model."""
 
 import json
 import logging
@@ -7,13 +7,6 @@ from typing import Any, Optional, Type
 from pydantic import BaseModel
 from google import genai
 from google.genai import types, errors
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_random_exponential,
-    retry_if_exception,
-    before_sleep_log,
-)
 
 from app.core.config import settings
 from app.core.exceptions import (
@@ -30,42 +23,54 @@ logger = logging.getLogger("adgen_ai.gemini")
 
 
 def is_transient_error(exc: Exception) -> bool:
-    """Determine if an exception is transient and safe to retry with exponential backoff."""
+    """Determine if an exception is transient and safe to retry with exponential backoff.
+
+    Transient errors: 503 (High Demand), 504 (Deadline Exceeded), 502/500 (Temporary Server Error),
+    and brief concurrency rate limits without quota depletion.
+
+    Non-transient errors: Auth (401/403), Invalid Arg (400), Not Found (404),
+    and unrecoverable Quota / Billing / Plan exhaustion.
+    """
     # Never retry configuration or validation errors
     if isinstance(exc, (GeminiConfigurationError, GeminiAuthError, ValueError, KeyError)):
         return False
 
-    # Check for known Google GenAI error classes
-    if isinstance(exc, errors.ServerError):
-        # 503 (High Demand / Service Unavailable), 500, 502, 504
-        return True
+    msg_str = str(exc).lower()
+
+    # Rule 1: Quota / billing / credit exhaustion is NEVER transient - fail fast to avoid wasted latency
+    unrecoverable_quota_terms = ["quota", "billing", "free tier", "credit", "exceeded your current quota"]
+    if any(term in msg_str for term in unrecoverable_quota_terms):
+        return False
+
+    # Rule 2: Client errors (4xx)
     if isinstance(exc, errors.ClientError):
         code = getattr(exc, "code", None)
-        if code == 429:
-            return True
         # 400, 401, 403, 404 should never be retried
         if code in (400, 401, 403, 404):
             return False
+        # 429 concurrency throttle (if not caught by Rule 1)
+        if code == 429:
+            return True
 
-    msg = str(exc).lower()
-    # Check transient keywords
+    # Rule 3: Known Server errors (500, 502, 503, 504)
+    if isinstance(exc, errors.ServerError):
+        return True
+
+    # Rule 4: Keywords for transient network or server load issues
     transient_keywords = [
         "high demand",
         "503",
         "unavailable",
-        "rate limit",
-        "resource_exhausted",
-        "429",
         "timeout",
         "deadline",
         "connection",
         "overloaded",
     ]
-    return any(k in msg for k in transient_keywords)
+    return any(k in msg_str for k in transient_keywords)
 
 
 class GeminiService:
-    """Encapsulates interaction with Google Gemini API."""
+    """Encapsulates interaction with Google Gemini API with performance metrics tracking."""
 
     def __init__(self):
         self._client: Optional[genai.Client] = None
@@ -81,7 +86,6 @@ class GeminiService:
                 "Gemini API Key chưa được cấu hình. Vui lòng thiết lập biến môi trường GEMINI_API_KEY trong file .env."
             )
         if self._client is None:
-            # Set timeout in milliseconds
             http_options = types.HttpOptions(timeout=settings.GEMINI_TIMEOUT * 1000)
             self._client = genai.Client(
                 api_key=settings.GEMINI_API_KEY,
@@ -89,32 +93,74 @@ class GeminiService:
             )
         return self._client
 
-    @retry(
-        stop=stop_after_attempt(max(1, settings.GEMINI_MAX_RETRIES)),
-        wait=wait_random_exponential(multiplier=1, min=1, max=8),
-        retry=retry_if_exception(is_transient_error),
-        before_sleep=before_sleep_log(logger, logging.WARNING),
-        reraise=True,
-    )
-    def _call_model_with_retry(
+    @staticmethod
+    def _build_thinking_config(model_name: str) -> Optional[types.ThinkingConfig]:
+        """Build appropriate thinking configuration for the specific Gemini model.
+
+        - Lite models (e.g. gemini-3.5-flash-lite): do not support thinking_budget (returns 400).
+          They natively operate in low-latency mode and support thinking_level=MINIMAL.
+        - Non-lite models (e.g. gemini-3.5-flash): support thinking_budget=0 to disable reasoning overhead.
+        """
+        m_lower = model_name.lower()
+        if "lite" in m_lower:
+            try:
+                if hasattr(types, "ThinkingLevel") and hasattr(types.ThinkingLevel, "MINIMAL"):
+                    return types.ThinkingConfig(thinking_level=types.ThinkingLevel.MINIMAL)
+            except Exception:
+                pass
+            return None
+        else:
+            try:
+                return types.ThinkingConfig(thinking_budget=0)
+            except Exception:
+                pass
+            return None
+
+    def _invoke_with_retry(
         self,
         model_name: str,
         prompt: str,
         config: types.GenerateContentConfig,
-    ):
-        """Invoke generate_content on a specific model with jittered exponential retry."""
+    ) -> tuple[Any, int]:
+        """Invoke generate_content with limited exponential retry, returning (response, retry_count)."""
         client = self.get_client()
-        logger.info(
-            "Calling Gemini model '%s' (prompt len=%d, timeout=%ds)",
-            model_name,
-            len(prompt),
-            settings.GEMINI_TIMEOUT,
-        )
-        return client.models.generate_content(
-            model=model_name,
-            contents=prompt,
-            config=config,
-        )
+        retries = 0
+        max_attempts = max(1, settings.GEMINI_MAX_RETRIES)
+        last_exc = None
+
+        for attempt in range(max_attempts):
+            try:
+                logger.info(
+                    "Calling Gemini model '%s' (attempt %d/%d, prompt len=%d, timeout=%ds)",
+                    model_name,
+                    attempt + 1,
+                    max_attempts,
+                    len(prompt),
+                    settings.GEMINI_TIMEOUT,
+                )
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=config,
+                )
+                return response, retries
+            except Exception as exc:
+                last_exc = exc
+                if not is_transient_error(exc) or attempt == max_attempts - 1:
+                    raise exc
+                retries += 1
+                backoff_time = min(4.0, 1.0 * (2 ** attempt))
+                logger.warning(
+                    "Attempt %d/%d for model '%s' failed (%s). Retrying in %.1fs...",
+                    attempt + 1,
+                    max_attempts,
+                    model_name,
+                    str(exc)[:120],
+                    backoff_time,
+                )
+                time.sleep(backoff_time)
+
+        raise last_exc
 
     def generate_structured(
         self,
@@ -122,35 +168,54 @@ class GeminiService:
         response_schema: Type[BaseModel],
         system_instruction: str = SYSTEM_INSTRUCTION,
         temperature: float = 0.7,
-    ) -> tuple[str, Optional[dict]]:
-        """Call Gemini API with Structured Output (JSON Schema), retry, and fallback model.
+        max_output_tokens: Optional[int] = None,
+    ) -> tuple[str, dict]:
+        """Call Gemini API with Structured Output (JSON Schema), performance metrics, and fallback.
 
         Returns:
             tuple[raw_json_text, usage_dict]
         """
-        # Ensure client is ready before configuring
         self.get_client()
 
-        config = types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            response_mime_type="application/json",
-            response_schema=response_schema,
-            temperature=temperature,
-        )
+        out_limit = max_output_tokens or settings.GEMINI_MAX_OUTPUT_TOKENS
+
+        # Configure base config with structured output and output limit
+        cfg_kwargs = {
+            "system_instruction": system_instruction,
+            "response_mime_type": "application/json",
+            "response_schema": response_schema,
+            "temperature": temperature,
+            "max_output_tokens": out_limit,
+        }
 
         primary_model = settings.GEMINI_MODEL
         fallback_model = settings.GEMINI_FALLBACK_MODEL
 
+        # Configure thinking parameters appropriately for primary model
+        primary_thinking = self._build_thinking_config(primary_model)
+        if primary_thinking is not None:
+            cfg_kwargs["thinking_config"] = primary_thinking
+
+        config = types.GenerateContentConfig(**cfg_kwargs)
+
+        t_gemini_start = time.perf_counter()
+        total_calls = 0
+        total_retries = 0
+        model_used = primary_model
         response = None
+
         try:
-            response = self._call_model_with_retry(primary_model, prompt, config)
+            total_calls += 1
+            response, retries = self._invoke_with_retry(primary_model, prompt, config)
+            total_retries += retries
+            model_used = primary_model
         except Exception as primary_exc:
             logger.warning(
-                "Primary model '%s' failed after retries: %s",
+                "Primary model '%s' failed: %s",
                 primary_model,
-                str(primary_exc),
+                str(primary_exc)[:150],
             )
-            # Check if fallback model is configured and the error was transient
+            # Try fallback model if configured and error is transient
             if (
                 fallback_model
                 and fallback_model.strip()
@@ -159,35 +224,61 @@ class GeminiService:
             ):
                 target_fallback = fallback_model.strip()
                 logger.info(
-                    "Switching to verified fallback model '%s' due to primary model error.",
+                    "Switching to verified fallback model '%s' due to primary error.",
                     target_fallback,
                 )
+                # Adjust thinking config for fallback if needed
+                fallback_cfg_kwargs = {
+                    "system_instruction": system_instruction,
+                    "response_mime_type": "application/json",
+                    "response_schema": response_schema,
+                    "temperature": temperature,
+                    "max_output_tokens": out_limit,
+                }
+                fallback_thinking = self._build_thinking_config(target_fallback)
+                if fallback_thinking is not None:
+                    fallback_cfg_kwargs["thinking_config"] = fallback_thinking
+                fallback_config = types.GenerateContentConfig(**fallback_cfg_kwargs)
+
                 try:
-                    response = self._call_model_with_retry(target_fallback, prompt, config)
+                    total_calls += 1
+                    response, retries = self._invoke_with_retry(target_fallback, prompt, fallback_config)
+                    total_retries += retries
+                    model_used = target_fallback
                 except Exception as fallback_exc:
                     logger.error(
                         "Fallback model '%s' also failed: %s",
                         target_fallback,
-                        str(fallback_exc),
+                        str(fallback_exc)[:150],
                     )
                     self._raise_mapped_exception(fallback_exc)
             else:
                 self._raise_mapped_exception(primary_exc)
+
+        t_gemini_end = time.perf_counter()
+        gemini_latency_ms = round((t_gemini_end - t_gemini_start) * 1000, 2)
 
         if not response or not response.text:
             raise GeminiBadGatewayError("Mô hình Gemini không trả về dữ liệu nội dung.")
 
         raw_text = response.text.strip()
 
-        usage_info = None
-        if hasattr(response, "usage_metadata") and response.usage_metadata:
-            usage_info = {
-                "prompt_token_count": getattr(response.usage_metadata, "prompt_token_count", None),
-                "candidates_token_count": getattr(response.usage_metadata, "candidates_token_count", None),
-                "total_token_count": getattr(response.usage_metadata, "total_token_count", None),
-            }
+        prompt_tokens = getattr(response.usage_metadata, "prompt_token_count", 0) if hasattr(response, "usage_metadata") else 0
+        candidate_tokens = getattr(response.usage_metadata, "candidates_token_count", 0) if hasattr(response, "usage_metadata") else 0
+        total_tokens = getattr(response.usage_metadata, "total_token_count", 0) if hasattr(response, "usage_metadata") else 0
 
-        return raw_text, usage_info
+        usage_dict = {
+            "model": model_used,
+            "prompt_token_count": prompt_tokens,
+            "candidates_token_count": candidate_tokens,
+            "total_token_count": total_tokens,
+            "gemini_calls": total_calls,
+            "retry_count": total_retries,
+            "gemini_request_ms": gemini_latency_ms,
+            "http_status": 200,
+        }
+
+        return raw_text, usage_dict
 
     def _raise_mapped_exception(self, exc: Exception) -> None:
         """Map raw Gemini exceptions to structured application exceptions with accurate HTTP codes."""
@@ -255,7 +346,6 @@ class GeminiService:
 
         try:
             client = self.get_client()
-            # Lightweight verification (model metadata lookup, does not consume generation quota)
             client.models.get(model=settings.GEMINI_MODEL)
             result = {
                 "configured": True,

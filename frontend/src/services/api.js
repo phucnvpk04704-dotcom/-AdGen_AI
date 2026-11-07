@@ -4,8 +4,9 @@
 
 import axios from 'axios';
 
-// Read API Base URL from environment variables, fallback to local backend default
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// Read API Base URL from environment variables, strip trailing slash, fallback to local backend default
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
