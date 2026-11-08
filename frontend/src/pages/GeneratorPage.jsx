@@ -81,9 +81,9 @@ export const GeneratorPage = () => {
           },
         ],
         headlines: [
-          { id: 'head-1', content: 'Giữ Trọn Nhiệt Độ Yêu Thích Suốt 12 Giờ Liền' },
-          { id: 'head-2', content: 'Phong Cách Tối Giản – Tiện Lợi Đồng Hành Mọi Lúc' },
-          { id: 'head-3', content: 'Nâng Cấp Lối Sống Năng Động Cùng Phụ Kiện Chuẩn Gu' },
+          { id: 'head-1', content: 'Xe máy VinFast hiện đại – Phong cách sống xanh thông minh' },
+          { id: 'head-2', content: 'Khẳng định phong cách lịch lãm, làm chủ mọi hành trình cùng công nghệ pin đỉnh cao' },
+          { id: 'head-3', content: 'Bạn đã sẵn sàng trải nghiệm công nghệ dẫn đầu ngay hôm nay?' },
         ],
         hashtags: [
           '#BinhGiuNhiet',

@@ -248,7 +248,7 @@ export const HistoryDetailModal = ({
                 return (
                   <div
                     key={idx}
-                    className="flex items-start sm:items-center justify-between p-3 rounded-xl border border-border bg-white gap-2"
+                    className="flex items-center justify-between px-3 py-2.5 sm:p-3 rounded-xl border border-border bg-white gap-2"
                   >
                     <span className="text-xs sm:text-sm font-semibold text-charcoal break-words whitespace-normal leading-snug flex-1">
                       {idx + 1}. {text}
